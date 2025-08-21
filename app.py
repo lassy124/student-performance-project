@@ -68,7 +68,8 @@ if uploaded_file is not None:
         # Metrics
         st.subheader("📉 Model Performance")
         st.write(f"**R² Score:** {r2_score(y_test, y_pred):.2f}")
-        st.write(f"**RMSE:** {mean_squared_error(y_test, y_pred, squared=False):.2f}")
+        rmse = mean_squared_error(y_test, y_pred, squared=True) ** 0.5
+        st.write(f"**RMSE:** {rmse:.2f}")
         st.write(f"**MAE:** {mean_absolute_error(y_test, y_pred):.2f}")
 
         # Scatter Plot
