@@ -7,29 +7,19 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
-# ----------------------------
-# Streamlit App Title
-# ----------------------------
 st.title("🎓 Student Performance Prediction App")
 
-# ----------------------------
-# Upload CSV
-# ----------------------------
 uploaded_file = st.file_uploader("📂 Upload your student dataset (CSV)", type="csv")
 
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
     st.success("✅ File uploaded successfully!")
 
-    # Show first rows
     st.subheader("🔍 Dataset Preview")
     st.dataframe(df.head())
 
-    # ----------------------------
-    # Dataset Info
-    # ----------------------------
     st.subheader("📊 Dataset Summary")
-    st.write(df.describe())
+    st.write(df.describe(include="all"))
 
     # ----------------------------
     # Correlation Heatmap
@@ -54,10 +44,23 @@ if uploaded_file is not None:
         X = df[features]
         y = df[target]
 
-        # Train-test split
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        # 🔹 Convert categorical features to numeric
+        X = pd.get_dummies(X, drop_first=True)
 
-        # Model
+        # 🔹 Convert target to numeric if needed
+        if y.dtype == "object" or not np.issubdtype(y.dtype, np.number):
+            y = pd.factorize(y)[0]
+
+        # 🚨 Ensure no NaN values
+        X = X.fillna(0)
+        y = pd.Series(y).fillna(0)
+
+        # Train-test split
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.2, random_state=42
+        )
+
+        # Train Model
         model = LinearRegression()
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
@@ -65,7 +68,7 @@ if uploaded_file is not None:
         # Metrics
         st.subheader("📉 Model Performance")
         st.write(f"**R² Score:** {r2_score(y_test, y_pred):.2f}")
-        st.write(f"**RMSE:** {mean_squared_error(y_test, y_pred, squared=True) ** 0.5:.2f}")
+        st.write(f"**RMSE:** {mean_squared_error(y_test, y_pred, squared=False):.2f}")
         st.write(f"**MAE:** {mean_absolute_error(y_test, y_pred):.2f}")
 
         # Scatter Plot
@@ -78,4 +81,5 @@ if uploaded_file is not None:
 
 else:
     st.info("👆 Please upload a CSV file to continue.")
+
 
