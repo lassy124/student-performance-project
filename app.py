@@ -7,14 +7,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
-# ----------------------------
-# Streamlit App Title
-# ----------------------------
 st.title("🎓 Student Performance Prediction App")
 
-# ----------------------------
-# File Upload
-# ----------------------------
 uploaded_file = st.file_uploader("📂 Upload your student dataset (CSV)", type="csv")
 
 if uploaded_file is not None:
@@ -29,9 +23,7 @@ if uploaded_file is not None:
     st.subheader("📊 Dataset Summary")
     st.write(df.describe(include="all"))
 
-    # ----------------------------
     # Correlation Heatmap
-    # ----------------------------
     if st.checkbox("📈 Show Correlation Heatmap"):
         numeric_df = df.select_dtypes(include=[np.number])
         if numeric_df.shape[1] > 1:
@@ -41,9 +33,7 @@ if uploaded_file is not None:
         else:
             st.warning("⚠️ Not enough numeric columns for correlation heatmap.")
 
-    # ----------------------------
     # Feature & Target Selection
-    # ----------------------------
     st.subheader("⚙️ Model Training")
     features = st.multiselect("Select Features (X)", df.columns.tolist())
     target = st.selectbox("Select Target (y)", df.columns.tolist())
@@ -73,22 +63,18 @@ if uploaded_file is not None:
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
 
-        # ----------------------------
         # Model Performance
-        # ----------------------------
         st.subheader("📉 Model Performance")
         st.write(f"**R² Score:** {r2_score(y_test, y_pred):.2f}")
 
-        # ✅ RMSE calculation (correct way)
-        rmse = mean_squared_error(y_test, y_pred, squared=False)
+        # RMSE compatible with all sklearn versions:
+        rmse = mean_squared_error(y_test, y_pred) ** 0.5
         st.write(f"**RMSE:** {rmse:.2f}")
 
         mae = mean_absolute_error(y_test, y_pred)
         st.write(f"**MAE:** {mae:.2f}")
 
-        # ----------------------------
         # Scatter Plot (Actual vs Predicted)
-        # ----------------------------
         fig, ax = plt.subplots()
         ax.scatter(y_test, y_pred, alpha=0.6)
         ax.set_xlabel("Actual")
@@ -98,6 +84,7 @@ if uploaded_file is not None:
 
 else:
     st.info("👆 Please upload a CSV file to continue.")
+
 
 
 
